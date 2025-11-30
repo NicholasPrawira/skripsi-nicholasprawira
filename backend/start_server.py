@@ -1,33 +1,17 @@
 #!/usr/bin/env python3
 """
-Startup script for the Tigaraksa Image Search API backend.
-This script ensures the application runs with the correct module path.
+Production startup script for the Tigaraksa Image Search API on Railway.
 """
 
 import os
-import sys
-import subprocess
-
-def main():
-    # Change to the backend directory
-    backend_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(backend_dir)
-    
-    # Run uvicorn with the correct module path
-    try:
-        subprocess.run([
-            "uvicorn", 
-            "app.main:app", 
-            "--host", "127.0.0.1", 
-            "--port", "8000", 
-            "--reload"
-        ], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error starting server: {e}")
-        sys.exit(1)
-    except KeyboardInterrupt:
-        print("\nServer stopped.")
-        sys.exit(0)
+import uvicorn
 
 if __name__ == "__main__":
-    main()
+    port = int(os.environ.get("PORT", 8000))
+
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=port,
+        reload=False  # MUST be false on Railway
+    )
