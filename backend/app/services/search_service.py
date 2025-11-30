@@ -11,17 +11,16 @@ def search_images(query: str, limit: int = 5) -> SearchResponse:
         conn = get_connection()
         cur = conn.cursor()
 
-        query_emb = encode_query(query)
-
+        # Use text search instead of embedding computation for production
         cur.execute(
             """
-            SELECT prompt, image_url, clipscore, 1 - (embedding <=> %s::vector) AS similarity
+            SELECT prompt, image_url, clipscore, 1.0 AS similarity
             FROM images
-            WHERE image_url IS NOT NULL
-            ORDER BY embedding <=> %s::vector
+            WHERE image_url IS NOT NULL AND prompt ILIKE %s
+            ORDER BY prompt
             LIMIT %s;
             """,
-            (query_emb, query_emb, limit),
+            (f'%{query}%', limit),
         )
 
         results = cur.fetchall()
